@@ -11,6 +11,8 @@ public class COLINControl : MonoBehaviour
 
     bool onGround = false;
 
+    public Transform cameraPos;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -20,38 +22,68 @@ public class COLINControl : MonoBehaviour
         anim.Play("IDLE");
     }
 
+    void Translater(Vector3 a)
+    {
+        body.velocity += a;
+        body.maxLinearVelocity = 500;
+    }
+
     // Update is called once per frame
     void Update()
     {
+        Vector3 newT = body.velocity;
+        newT.y += Physics.gravity.y * body.mass;
+        body.velocity = newT;
+        bool standStill = (body.velocity.x >= -25 && body.velocity.x <= 25) && (body.velocity.z >= -25 && body.velocity.z <= 25);
+
+        // Ground check
+        {
+            onGround = Physics.CheckSphere(GameObject.Find("COLIN_GROUND_CHECKER").transform.position, 0.2f);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space) && onGround)
+        {
+            body.AddForce(new Vector3(0, -1000, 0));
+        }
+
         if (Input.GetKey(KeyCode.DownArrow))
         {
-            anim.Play("RUN");
-            transform.Translate(new Vector3(0, 0, 10));
+            //anim.Play("RUN");
+            Translater(new Vector3(0, 0, 100));
         }
         if (Input.GetKey(KeyCode.UpArrow))
         {
-            anim.Play("RUN");
-            transform.Translate(new Vector3(0, 0, -10));
+            //anim.Play("RUN");
+            Translater(new Vector3(0, 0, -100));
         }
         if (Input.GetKey(KeyCode.LeftArrow))
         {
-            anim.Play("RUN");
-            transform.Translate(new Vector3(10, 0));
+            //anim.Play("RUN");
+            Translater(new Vector3(100, 0));
         }
         if (Input.GetKey(KeyCode.RightArrow))
         {
-            anim.Play("RUN");
-            transform.Translate(new Vector3(-10, 0));
+            //anim.Play("RUN");
+            Translater(new Vector3(-100, 0));
         }
 
-        body.velocity += Physics.gravity * body.mass;
+        cameraPos.position = new Vector3(transform.position.x, cameraPos.position.y, transform.position.z + 550);
 
-        onGround = body.velocity.y == 0;
-
-        if (Input.GetKeyDown(KeyCode.Space))
+        // animation
+        if (standStill)
         {
-            if (onGround) body.velocity = new Vector3(0, 150 * 10, 0);
-            Debug.Log("body.velocity = " + body.velocity);
+            anim.Play("IDLE");
+        }
+        else
+        {
+            anim.Play("RUN");
+        }
+
+        if (transform.position.y <= -500)
+        {
+            Vector3 newPos = transform.position;
+            newPos.y = 0;
+            transform.position = newPos;
         }
     }
 }
