@@ -20,6 +20,16 @@ public class Changer : MonoBehaviour
         SCENEManager.ChangeScene("Scenes/Level01");
     }
 
+    public void ToOptions()
+    {
+        SCENEManager.ChangeScene("Scenes/Menu");
+    }
+
+    public void ToTitle()
+    {
+        SCENEManager.ChangeScene("Scenes/Title");
+    }
+
     public void Goodbye()
     {
         SCENEManager.ExitGame();

@@ -13,6 +13,8 @@ public class COLINControl : MonoBehaviour
 
     public Transform cameraPos;
 
+    Vector3 prevPos;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -20,6 +22,8 @@ public class COLINControl : MonoBehaviour
         anim = GetComponent<Animator>();
 
         anim.Play("IDLE");
+
+        prevPos = transform.position;
     }
 
     void Translater(Vector3 a)
@@ -28,46 +32,77 @@ public class COLINControl : MonoBehaviour
         body.maxLinearVelocity = 500;
     }
 
+    float rotPad = 0;
+
     // Update is called once per frame
     void Update()
     {
+        Vector3 prevPos = transform.position;
         Vector3 newT = body.velocity;
-        newT.y += Physics.gravity.y * body.mass;
+        newT.y += Physics.gravity.y * (body.mass / 2);
         body.velocity = newT;
-        bool standStill = (body.velocity.x >= -25 && body.velocity.x <= 25) && (body.velocity.z >= -25 && body.velocity.z <= 25);
 
-        // Ground check
-        {
-            onGround = Physics.CheckSphere(GameObject.Find("COLIN_GROUND_CHECKER").transform.position, 0.2f);
-        }
+        bool standStill = (body.velocity.x >= -3 && body.velocity.x <= 3) && (body.velocity.z >= -3 && body.velocity.z <= 3);
+        bool moving = !standStill;
+        bool pressLeft = Input.GetKey(KeyCode.LeftArrow);
+        bool pressRight = Input.GetKey(KeyCode.RightArrow);
+        bool pressUp = Input.GetKey(KeyCode.UpArrow);
+        bool pressDown = Input.GetKey(KeyCode.DownArrow);
+        bool pressMove = pressLeft || pressRight || pressUp || pressDown;
 
-        if (Input.GetKeyDown(KeyCode.Space) && onGround)
+        /*if (pressMove)
         {
-            body.AddForce(new Vector3(0, -1000, 0));
-        }
+            float moveX = Input.GetAxis("Horizontal"); // A/D or Left/Right for strafing
+            float moveZ = Input.GetAxis("Vertical"); // W/S or Up/Down for forward/backward
 
-        if (Input.GetKey(KeyCode.DownArrow))
+            Vector3 move = new Vector3(moveX, 0, moveZ) * 5;
+            move = transform.TransformDirection(move); // Adjust movement relative to player's direction
+            Vector3 velocity = body.velocity;
+            velocity.x = move.x;
+            velocity.z = move.z;
+            body.velocity = velocity;
+        }*/
+
+        if (pressUp)
         {
-            //anim.Play("RUN");
-            Translater(new Vector3(0, 0, 100));
+            rotPad = 0;
         }
-        if (Input.GetKey(KeyCode.UpArrow))
+        else if (pressDown)
         {
-            //anim.Play("RUN");
-            Translater(new Vector3(0, 0, -100));
-        }
-        if (Input.GetKey(KeyCode.LeftArrow))
-        {
-            //anim.Play("RUN");
-            Translater(new Vector3(100, 0));
-        }
-        if (Input.GetKey(KeyCode.RightArrow))
-        {
-            //anim.Play("RUN");
-            Translater(new Vector3(-100, 0));
+            rotPad = 180;
         }
 
-        cameraPos.position = new Vector3(transform.position.x, cameraPos.position.y, transform.position.z + 550);
+        /*if (pressLeft)
+        {
+            rotPad = 270;
+        }
+        if (pressRight)
+        {
+            rotPad = 90;
+        }*/
+
+        Quaternion newRot;
+        newRot.x = 0;
+        newRot.z = 0;
+        newRot.w = 0;
+        newRot.y = rotPad;
+        transform.rotation = newRot;
+
+        if (pressMove)
+        {
+            float xmove = 0;
+            float zmove = 0;
+            if (pressUp || pressDown) zmove = 50;
+            if (pressLeft || pressRight) xmove = 50;
+            Vector3 move = new Vector3(xmove, 0, zmove) * 2;
+            move = transform.TransformDirection(move); // Adjust movement relative to player's direction
+            Vector3 velocity = body.velocity;
+            velocity.x = move.x;
+            velocity.z = move.z;
+            body.velocity = velocity;
+        }
+
+        cameraPos.position += transform.position - prevPos;
 
         // animation
         if (standStill)
@@ -85,5 +120,7 @@ public class COLINControl : MonoBehaviour
             newPos.y = 0;
             transform.position = newPos;
         }
+
+        prevPos = transform.position;
     }
 }
