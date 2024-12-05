@@ -283,7 +283,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2000, y: 2000, z: 2000}
+  m_LocalScale: {x: 500, y: 500, z: 500}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4236198626422241776}
@@ -374,7 +374,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -7756117249417178864, guid: 8a4ffcd8d7c8c474e965ad794e9b92e6, type: 3}
+  - {fileID: 2100000, guid: 1ad285bc3222ea94a9e4bfef656b5e5b, type: 2}
   - {fileID: -6138108424191209872, guid: 8a4ffcd8d7c8c474e965ad794e9b92e6, type: 3}
   - {fileID: 2001538890604573707, guid: 8a4ffcd8d7c8c474e965ad794e9b92e6, type: 3}
   - {fileID: -1235821900935645649, guid: 8a4ffcd8d7c8c474e965ad794e9b92e6, type: 3}

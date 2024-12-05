@@ -7,7 +7,7 @@ public class Changer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        SettingsMain.Load();
     }
 
     // Update is called once per frame
@@ -22,11 +22,15 @@ public class Changer : MonoBehaviour
 
     public void ToOptions()
     {
+        SettingsMain.Save();
+        SettingsMain.Load();
         SCENEManager.ChangeScene("Scenes/Menu");
     }
 
     public void ToTitle()
     {
+        SettingsMain.Save();
+        SettingsMain.Load();
         SCENEManager.ChangeScene("Scenes/Title");
     }
 
