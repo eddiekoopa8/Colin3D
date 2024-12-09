@@ -2,6 +2,7 @@ using NUnit.Framework.Internal.Filters;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Android.Gradle.Manifest;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class COLINControl : MonoBehaviour
@@ -16,6 +17,26 @@ public class COLINControl : MonoBehaviour
     Vector3 prevPos;
 
     public string sceneName;
+
+    public static bool Verify(GameObject obj)
+    {
+        return obj.GetComponent<COLINControl>() != null;
+    }
+
+    public static bool Verify(Collision obj)
+    {
+        return obj.gameObject.GetComponent<COLINControl>() != null;
+    }
+
+    public static COLINControl Get(GameObject obj)
+    {
+        return obj.GetComponent<COLINControl>();
+    }
+
+    public static COLINControl Get(Collision obj)
+    {
+        return obj.gameObject.GetComponent<COLINControl>();
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -34,11 +55,47 @@ public class COLINControl : MonoBehaviour
         body.maxLinearVelocity = 500;
     }
 
-    static void turnAround(string gameObj, float value)
+    public bool Punching()
     {
-        Quaternion newRot = new Quaternion(-90, value,0,0);
-        GameObject.Find(gameObj).transform.rotation = newRot;
+        return punching;
     }
+
+    bool hurt = false;
+    bool hurtKnockDone = false;
+    int hurtTick = 0;
+    int hurtTimer = 20;
+    bool hurtInvins = false;
+    bool hurtInvinsDone = false;
+    int hurtInvTick = 0;
+    int hurtInvTimer = 50;
+
+    public void Hurt()
+    {
+        if (hurtInvins == false && hurt == false)
+        {
+            Debug.Log("HURT");
+            hurt = true;
+            hurtKnockDone = false;
+            hurtTick = 0;
+            hurtInvins = false;
+            hurtInvinsDone = false;
+            hurtInvTick = 0;
+
+            Vector3 move = new Vector3(0, 0, -9f) * 29;
+            move = transform.TransformDirection(move); // Adjust movement relative to player's direction
+            Vector3 velocity = body.velocity;
+            velocity.x = move.x;
+            velocity.z = move.z;
+            body.velocity = velocity;
+
+            anim.playbackTime = 0;
+        }
+    }
+
+    bool punching = false;
+    bool punchDone = false;
+    int punchTick = 0;
+    int punchTimer = 15;
 
     // Update is called once per frame
     void Update()
@@ -54,25 +111,25 @@ public class COLINControl : MonoBehaviour
         bool pressUp = Input.GetKey(KeyCode.UpArrow);
         bool pressDown = Input.GetKey(KeyCode.DownArrow);
         bool pressMove = pressLeft || pressRight || pressUp || pressDown;
+        bool pressPunch = Input.GetKeyDown(KeyCode.LeftControl);
 
-        if (pressUp)
+        if (pressPunch && !punching && !hurt)
         {
-            turnAround("COLINBody", 0);
-        }
-        else if (pressDown)
-        {
-            turnAround("COLINBody", 180);
-        }
-        else if (pressLeft)
-        {
-            turnAround("COLINBody", 90);
-        }
-        else if (pressRight)
-        {
-            turnAround("COLINBody", 270);
+            punching = true;
+            punchTick = 0;
+            punchDone = false;
+            anim.playbackTime = 0;
+            anim.Play("PUNCH");
+
+            Vector3 move = new Vector3(0, 0, 7.5f) * 29;
+            move = transform.TransformDirection(move); // Adjust movement relative to player's direction
+            Vector3 velocity = body.velocity;
+            velocity.x = move.x;
+            velocity.z = move.z;
+            body.velocity = velocity;
         }
 
-        if (pressMove)
+        if (pressMove && !punching && !hurt)
         {
             float moveX = Input.GetAxis("Horizontal") * 2.5f; // A/D or Left/Right
             float moveZ = Input.GetAxis("Vertical") * 2.5f; // W/S or Up/Down
@@ -87,18 +144,25 @@ public class COLINControl : MonoBehaviour
 
         cameraPos.position += transform.position - prevPos;
 
-        Quaternion newRot = transform.rotation;
-        newRot.y = cameraPos.rotation.y;
-        transform.rotation = newRot;
-
         // animation
-        if (standStill)
+        if (!punching && !hurt)
         {
-            anim.Play("IDLE");
+            if (standStill)
+            {
+                anim.Play("IDLE");
+            }
+            else
+            {
+                anim.Play("RUN");
+            }
         }
-        else
+        if(punching)
         {
-            anim.Play("RUN");
+            anim.Play("PUNCH");
+        }
+        if (hurt)
+        {
+            anim.Play("KNOCK");
         }
 
         if (transform.position.y <= -500)
@@ -116,6 +180,43 @@ public class COLINControl : MonoBehaviour
         if (collision.gameObject.CompareTag("TELEPORTER"))
         {
             SCENEManager.ChangeScene(sceneName);
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if (punching && !punchDone)
+        {
+            if (punchTick++ >= punchTimer)
+            {
+                punchDone = true;
+                punching = false;
+            }
+        }
+
+        if (hurt && !hurtKnockDone)
+        {
+            if (hurtTick++ >= hurtTimer)
+            {
+                hurtKnockDone = true;
+                hurt = false;
+                hurtInvins = true;
+                hurtInvinsDone = false;
+                Debug.Log("HURT INV");
+            }
+        }
+
+        if (hurtInvins && !hurtInvinsDone && hurtKnockDone)
+        {
+            if (hurtInvTick++ >= hurtInvTimer)
+            {
+                hurtKnockDone = true;
+                hurt = false;
+                hurtInvins = false;
+                hurtInvinsDone = true;
+
+                Debug.Log("HURT DONE");
+            }
         }
     }
 }

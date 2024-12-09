@@ -53,6 +53,7 @@ public class SCENEManager : MonoBehaviour
 
     static void changeScene__(string name, int id)
     {
+        MAINGame.EnemyFollow(false);
         if (id == -1 && name == null)
         {
             Debug.LogError($"scene arg is missing. please supply them");
