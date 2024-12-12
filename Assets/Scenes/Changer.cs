@@ -17,7 +17,7 @@ public class Changer : MonoBehaviour
     }
     public void ChangeNext()
     {
-        SCENEManager.ChangeScene("Scenes/Level01");
+        SCENEManager.ChangeScene("Scenes/Story");
     }
 
     public void ToOptions()

@@ -22,6 +22,7 @@ public class CRATEBrian : MonoBehaviour
         {
             if (COLINControl.Get(collision).Punching())
             {
+                COLINControl.PlaySnd("HitSound");
                 Debug.Log("PUNCH");
                 Destroy(gameObject);
                 MAINGame.EnemyFollow(true);

@@ -60,6 +60,12 @@ public class COLINControl : MonoBehaviour
         return punching;
     }
 
+    public static void PlaySnd(string name)
+    {
+        GameObject.Find(name).GetComponent<AudioSource>().Stop();
+        GameObject.Find(name).GetComponent<AudioSource>().Play();
+    }
+
     bool hurt = false;
     bool hurtKnockDone = false;
     int hurtTick = 0;
@@ -67,9 +73,11 @@ public class COLINControl : MonoBehaviour
     bool hurtInvins = false;
     bool hurtInvinsDone = false;
     int hurtInvTick = 0;
-    int hurtInvTimer = 50;
+    int hurtInvTimer = 10;
+    int hurtDeadTick = 0;
+    int hurtDeadTimer = 160;
 
-    public void Hurt()
+    public void Hurt(int hurtPoint = 1)
     {
         if (hurtInvins == false && hurt == false)
         {
@@ -81,6 +89,8 @@ public class COLINControl : MonoBehaviour
             hurtInvinsDone = false;
             hurtInvTick = 0;
 
+            PlaySnd("HitSound");
+
             Vector3 move = new Vector3(0, 0, -9f) * 29;
             move = transform.TransformDirection(move); // Adjust movement relative to player's direction
             Vector3 velocity = body.velocity;
@@ -89,6 +99,15 @@ public class COLINControl : MonoBehaviour
             body.velocity = velocity;
 
             anim.playbackTime = 0;
+
+            MAINGame.DecHealth(hurtPoint);
+            MAINGame.DecStar(5);
+            if (MAINGame.Health <= 0)
+            {
+                
+                MAINGame.EnemyFollow(false);
+                transform.Rotate(new Vector3(0, -90));
+            }
         }
     }
 
@@ -162,7 +181,14 @@ public class COLINControl : MonoBehaviour
         }
         if (hurt)
         {
-            anim.Play("KNOCK");
+            if (MAINGame.Health <= 0)
+            {
+                anim.Play("DEAD");
+            }
+            else
+            {
+                anim.Play("KNOCK");
+            }
         }
 
         if (transform.position.y <= -500)
@@ -196,13 +222,28 @@ public class COLINControl : MonoBehaviour
 
         if (hurt && !hurtKnockDone)
         {
-            if (hurtTick++ >= hurtTimer)
+            if (MAINGame.Health > 0)
             {
-                hurtKnockDone = true;
-                hurt = false;
-                hurtInvins = true;
-                hurtInvinsDone = false;
-                Debug.Log("HURT INV");
+                if (hurtTick++ >= hurtTimer)
+                {
+                    hurtKnockDone = true;
+                    hurt = false;
+                    hurtInvins = true;
+                    hurtInvinsDone = false;
+                    Debug.Log("HURT INV");
+                }
+            }
+            else
+            {
+                if (hurtDeadTick++ >= hurtDeadTimer)
+                {
+                    hurtDeadTick = 0;
+                    hurt = false;
+                    MAINGame.ResetHealth();
+                    anim.Play("DIED");
+                    transform.position = new Vector3(-90000,-90000,-90000); // what? just felt like it
+                    SCENEManager.Restart();
+                }
             }
         }
 

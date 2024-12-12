@@ -6,7 +6,7 @@ using System;
 
 public class SCENEManager : MonoBehaviour
 {
-    static bool restarting = false;
+    //static bool restarting = false;
     public static void ChangeScene(int id)
     {
         changeScene__(null, id);
@@ -19,10 +19,12 @@ public class SCENEManager : MonoBehaviour
 
     public static void Restart()
     {
-        if (!restarting)
+        //if (!restarting)
+        //for (int i = 0; i < 3; i++) // HACK: Make sure it does
         {
-            SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().name, LoadSceneMode.Single);
-            restarting = true;
+            MAINGame.EnemyFollow(false);
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name, LoadSceneMode.Single);
+            //restarting = true;
         }
     }
 
@@ -69,11 +71,11 @@ public class SCENEManager : MonoBehaviour
         {
             if (id != -1)
             {
-                SceneManager.LoadSceneAsync(id, LoadSceneMode.Single);
+                SceneManager.LoadScene(id, LoadSceneMode.Single);
             }
             else if (name != null)
             {
-                SceneManager.LoadSceneAsync(name, LoadSceneMode.Single);
+                SceneManager.LoadScene(name, LoadSceneMode.Single);
             }
             else
             {

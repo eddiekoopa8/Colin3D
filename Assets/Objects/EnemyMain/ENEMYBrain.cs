@@ -40,13 +40,14 @@ public class ENEMYBrain : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (COLINControl.Verify(collision))
+        if (COLINControl.Verify(collision) && MAINGame.Health > 0)
         {
-            body.velocity = -body.velocity;
+            body.velocity = new Vector3(0, 0, 0);
             if (COLINControl.Get(collision).Punching())
             {
                 Debug.Log("PUNCH");
                 Destroy(gameObject);
+                COLINControl.PlaySnd("EnemySound");
                 MAINGame.EnemyFollow(true);
             }
             else
